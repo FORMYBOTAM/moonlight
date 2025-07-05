@@ -228,7 +228,7 @@ Type {help_command} to get a list of available commands</b>'''
 
     # async def countNode(_, message): ----> gd_count.py
     COUNT_MSG = '<b>Counting:</b> <code>{LINK}</code>'
-    COUNT_NAME = '<b>Name: </b><code><i>{COUNT_NAME}</i></code>'
+    COUNT_NAME = '<b>Name: </b><code><i>{COUNT_NAME}</i></code>\n┃\n'
     COUNT_SIZE = '┠ <b>Size: </b>{COUNT_SIZE}\n'
     COUNT_TYPE = '┠ <b>Type: </b>{COUNT_TYPE}\n'
     COUNT_SUB =  '┠ <b>SubFolders: </b>{COUNT_SUB}\n'
