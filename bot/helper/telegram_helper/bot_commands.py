@@ -4,11 +4,11 @@ from bot import CMD_SUFFIX, config_dict
 class _BotCommands:
     def __init__(self):
         self.StartCommand = 'start'
-        self.MirrorCommand = [f'mirror{CMD_SUFFIX}', f'm{CMD_SUFFIX}']
-        self.QbMirrorCommand = [f'qbmirror{CMD_SUFFIX}', f'qm{CMD_SUFFIX}']
+        self.MirrorCommand = [f'm{CMD_SUFFIX}', f'mirror{CMD_SUFFIX}']
+        self.QbMirrorCommand = [f'qb{CMD_SUFFIX}', f'qbmirror{CMD_SUFFIX}']
         self.YtdlCommand = [f'ytdl{CMD_SUFFIX}', f'y{CMD_SUFFIX}']
-        self.LeechCommand = [f'leech{CMD_SUFFIX}', f'l{CMD_SUFFIX}']
-        self.QbLeechCommand = [f'qbleech{CMD_SUFFIX}', f'ql{CMD_SUFFIX}']
+        self.LeechCommand = [f'l{CMD_SUFFIX}', f'leech{CMD_SUFFIX}']
+        self.QbLeechCommand = [f'ql{CMD_SUFFIX}', f'qbleech{CMD_SUFFIX}']
         self.YtdlLeechCommand = [f'ytdlleech{CMD_SUFFIX}', f'yl{CMD_SUFFIX}']
         if config_dict['SHOW_EXTRA_CMDS']:
             self.MirrorCommand.extend([f'unzipmirror{CMD_SUFFIX}', f'uzm{CMD_SUFFIX}', f'zipmirror{CMD_SUFFIX}', f'zm{CMD_SUFFIX}'])
