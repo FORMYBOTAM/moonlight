@@ -704,10 +704,6 @@ async def set_commands(client):
                 f'or /{BotCommands.YtdlLeechCommand[1]} Leech yt-dlp supported links via bot',
             ),
             BotCommand(
-                BotCommands.CloneCommand[0],
-                f'or /{BotCommands.CloneCommand[1]} Copy file/folder to Drive (GDrive/RClone)',
-            ),
-            BotCommand(
                 BotCommands.CountCommand,
                 '[drive_url]: Count file/folder of Google Drive/RClone Drives',
             ),
@@ -722,15 +718,6 @@ async def set_commands(client):
             BotCommand(
                 BotCommands.BtSelectCommand,
                 'Select files to download only torrents/magnet qbit/aria2c',
-            ),
-            BotCommand(
-                BotCommands.CategorySelect,
-                'Select Upload Category with UserTD or Bot Categories to upload only GDrive upload',
-            ),
-            BotCommand(BotCommands.CancelMirror, 'Cancel a Task of yours!'),
-            BotCommand(
-                BotCommands.CancelAllCommand[0],
-                'Cancel all Tasks in whole Bots.',
             ),
             BotCommand(BotCommands.ListCommand, 'Search in Drive(s)'),
             BotCommand(
