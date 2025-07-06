@@ -242,12 +242,12 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
     return True
 
 async def format_filename(file_, user_id, dirpath=None, isMirror=False):
-    # --- Define your default keywords to remove here ---
     default_remname = [
         r'www\S+',
-        r'\| ahm7tech\.vercel\.app \|',
+        r'\s+\|\s+ahm7tech\.vercel\.app\s+\|',  # This pattern now removes extra spaces
         # Add other default regex patterns or simple text here
     ]
+    # ----------------------------------------------------
     # ----------------------------------------------------
 
     user_dict = user_data.get(user_id, {})
