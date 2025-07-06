@@ -242,30 +242,52 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
     return True
 
 async def format_filename(file_, user_id, dirpath=None, isMirror=False):
+    # --- Define your default keywords to remove here ---
+    default_remname = [
+        r'www\S+',
+        r'\| ahm7tech\.vercel\.app \|',
+        # Add other default regex patterns or simple text here
+    ]
+    # ----------------------------------------------------
+
     user_dict = user_data.get(user_id, {})
     ftag, ctag = ('m', 'MIRROR') if isMirror else ('l', 'LEECH')
     prefix = config_dict[f'{ctag}_FILENAME_PREFIX'] if (val:=user_dict.get(f'{ftag}prefix', '')) == '' else val
     remname = config_dict[f'{ctag}_FILENAME_REMNAME'] if (val:=user_dict.get(f'{ftag}remname', '')) == '' else val
     suffix = config_dict[f'{ctag}_FILENAME_SUFFIX'] if (val:=user_dict.get(f'{ftag}suffix', '')) == '' else val
     lcaption = config_dict['LEECH_FILENAME_CAPTION'] if (val:=user_dict.get('lcaption', '')) == '' else val
- 
+
     prefile_ = file_
-    file_ = re_sub(r'www\S+', '', file_)
-        
+
+    # Combine default remname with user's remname
+    user_remname_rules = []
     if remname:
+        remname = remname.replace('\s', ' ')
         if not remname.startswith('|'):
             remname = f"|{remname}"
-        remname = remname.replace('\s', ' ')
-        slit = remname.split("|")
+        user_remname_rules = remname.split("|")
+
+    # The combined list of all rules to apply
+    all_rules = default_remname + user_remname_rules
+    
+    # Process all remname rules
+    if all_rules:
         __newFileName = ospath.splitext(file_)[0]
-        for rep in range(1, len(slit)):
-            args = slit[rep].split(":")
-            if len(args) == 3:
-                __newFileName = re_sub(args[0], args[1], __newFileName, int(args[2]))
-            elif len(args) == 2:
-                __newFileName = re_sub(args[0], args[1], __newFileName)
-            elif len(args) == 1:
-                __newFileName = re_sub(args[0], '', __newFileName)
+        for rule in all_rules:
+            if not rule:
+                continue
+            
+            args = rule.split(":")
+            try:
+                if len(args) == 3:
+                    __newFileName = re_sub(args[0], args[1], __newFileName, int(args[2]))
+                elif len(args) == 2:
+                    __newFileName = re_sub(args[0], args[1], __newFileName)
+                elif len(args) == 1:
+                    __newFileName = re_sub(args[0], '', __newFileName)
+            except Exception as e:
+                LOGGER.error(f"Error during remname '{rule}': {e}")
+
         file_ = __newFileName + ospath.splitext(file_)[1]
         LOGGER.info(f"New Remname : {file_}")
 
