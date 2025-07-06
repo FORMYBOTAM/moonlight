@@ -792,71 +792,72 @@ class GoogleDriveHelper:
     @retry(wait=wait_exponential(multiplier=2, min=3, max=6), stop=stop_after_attempt(3),
            retry=(retry_if_exception_type(Exception)))
     def __download_file(self, file_id, path, filename, mime_type):
-    # Define Google Docs MIME types and their export formats
-    export_mimetypes = {
-        'application/vnd.google-apps.document': ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'),
-        'application/vnd.google-apps.spreadsheet': ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'),
-        'application/vnd.google-apps.presentation': ('application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx')
-    }
+        # Define Google Docs MIME types and their export formats
+        export_mimetypes = {
+            'application/vnd.google-apps.document': ('application/vnd.openxmlformats-officedocument.wordprocessingml.document', '.docx'),
+            'application/vnd.google-apps.spreadsheet': ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', '.xlsx'),
+            'application/vnd.google-apps.presentation': ('application/vnd.openxmlformats-officedocument.presentationml.presentation', '.pptx')
+        }
 
-    if mime_type in export_mimetypes:
-        # It's a Google Doc, so EXPORT it
-        export_mime, export_ext = export_mimetypes[mime_type]
-        filename += export_ext
-        request = self.__service.files().export_media(fileId=file_id, mimeType=export_mime)
-        LOGGER.info(f"Exporting GDrive file: {filename}")
-    else:
-        # It's a regular binary file, so DOWNLOAD it
-        request = self.__service.files().get_media(
-            fileId=file_id, supportsAllDrives=True)
-        LOGGER.info(f"Downloading GDrive file: {filename}")
+        if mime_type in export_mimetypes:
+            # It's a Google Doc, so EXPORT it
+            export_mime, export_ext = export_mimetypes[mime_type]
+            filename += export_ext
+            request = self.__service.files().export_media(fileId=file_id, mimeType=export_mime)
+            LOGGER.info(f"Exporting GDrive file: {filename}")
+        else:
+            # It's a regular binary file, so DOWNLOAD it
+            request = self.__service.files().get_media(
+                fileId=file_id, supportsAllDrives=True)
+            LOGGER.info(f"Downloading GDrive file: {filename}")
 
-    filename = filename.replace('/', '')
-    if len(filename.encode()) > 255:
-        ext = ospath.splitext(filename)[1]
-        filename = f"{filename[:245]}{ext}"
-        if self.name.endswith(ext):
-            self.name = filename
-    if self.__is_cancelled:
-        return
-    fh = FileIO(f"{path}/{filename}", 'wb')
-    downloader = MediaIoBaseDownload(
-        fh, request, chunksize=100 * 1024 * 1024)
-    done = False
-    retries = 0
-    while not done:
+        filename = filename.replace('/', '')
+        if len(filename.encode()) > 255:
+            ext = ospath.splitext(filename)[1]
+            filename = f"{filename[:245]}{ext}"
+            if self.name.endswith(ext):
+                self.name = filename
         if self.__is_cancelled:
-            fh.close()
-            break
-        try:
-            self.__status, done = downloader.next_chunk()
-        except HttpError as err:
-            if err.resp.status in [500, 502, 503, 504] and retries < 10:
-                retries += 1
-                continue
-            if err.resp.get('content-type', '').startswith('application/json'):
-                reason = eval(err.content).get(
-                    'error').get('errors')[0].get('reason')
-                if reason not in [
-                    'downloadQuotaExceeded',
-                    'dailyLimitExceeded',
-                ]:
-                    raise err
-                if config_dict['USE_SERVICE_ACCOUNTS']:
-                    if self.__sa_count >= self.__sa_number:
-                        LOGGER.info(
-                            f"Reached maximum number of service accounts switching, which is {self.__sa_count}")
+            return
+        fh = FileIO(f"{path}/{filename}", 'wb')
+        downloader = MediaIoBaseDownload(
+            fh, request, chunksize=100 * 1024 * 1024)
+        done = False
+        retries = 0
+        while not done:
+            if self.__is_cancelled:
+                fh.close()
+                break
+            try:
+                self.__status, done = downloader.next_chunk()
+            except HttpError as err:
+                if err.resp.status in [500, 502, 503, 504] and retries < 10:
+                    retries += 1
+                    continue
+                if err.resp.get('content-type', '').startswith('application/json'):
+                    reason = eval(err.content).get(
+                        'error').get('errors')[0].get('reason')
+                    if reason not in [
+                        'downloadQuotaExceeded',
+                        'dailyLimitExceeded',
+                    ]:
                         raise err
+                    if config_dict['USE_SERVICE_ACCOUNTS']:
+                        if self.__sa_count >= self.__sa_number:
+                            LOGGER.info(
+                                f"Reached maximum number of service accounts switching, which is {self.__sa_count}")
+                            raise err
+                        else:
+                            if self.__is_cancelled:
+                                return
+                            self.__switchServiceAccount()
+                            LOGGER.info(f"Got: {reason}, Trying Again...")
+                            return self.__download_file(file_id, path, filename, mime_type)
                     else:
-                        if self.__is_cancelled:
-                            return
-                        self.__switchServiceAccount()
-                        LOGGER.info(f"Got: {reason}, Trying Again...")
-                        return self.__download_file(file_id, path, filename, mime_type)
-                else:
-                    LOGGER.error(f"Got: {reason}")
-                    raise err
-    self.__file_processed_bytes = 0
+                        LOGGER.error(f"Got: {reason}")
+                        raise err
+        self.__file_processed_bytes = 0
+
     async def cancel_download(self):
         self.__is_cancelled = True
         if self.__is_downloading:
