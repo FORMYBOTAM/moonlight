@@ -244,7 +244,11 @@ async def split_file(path, size, file_, dirpath, split_size, listener, start_tim
 async def format_filename(file_, user_id, dirpath=None, isMirror=False):
     default_remname = [
         r'www\S+',
-        r'\s+\|\s+ahm7tech\.vercel\.app\s+\|',  # This pattern now removes extra spaces
+        r'\s+\|\s+ahm7tech\.vercel\.app\s+\|',
+        'Leaked By ',
+        '_@Ahm7Tech',
+        r'heylink\.me/AhmTech',
+        r'\((moneyvipprogram\.com)\)', # Added this line
         # Add other default regex patterns or simple text here
     ]
     # ----------------------------------------------------
