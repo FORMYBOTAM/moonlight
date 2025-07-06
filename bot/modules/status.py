@@ -57,8 +57,4 @@ async def status_pages(_, query):
 
 bot.add_handler(MessageHandler(mirror_status, filters=command(
     BotCommands.StatusCommand) & CustomFilters.authorized & ~CustomFilters.blacklisted))
-
-bot.add_handler(MessageHandler(mirror_status, filters=command(
-    BotCommands.SallCommand) & CustomFilters.authorized & ~CustomFilters.blacklisted))
-
 bot.add_handler(CallbackQueryHandler(status_pages, filters=regex("^status")))
