@@ -250,6 +250,7 @@ async def format_filename(file_, user_id, dirpath=None, isMirror=False):
         '@AHM7TECH',
         '@Beyond_TheHorizon',
         r'heylink\.me/AhmTech',
+        r'\((moneyVIPprogram.com)\)',
         r'\((moneyvipprogram\.com)\)', # Added this line
         # Add other default regex patterns or simple text here
     ]
